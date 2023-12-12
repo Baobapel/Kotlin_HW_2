@@ -1,45 +1,59 @@
-const val ERROR_TYPE = -1
-const val ERROR_LIMIT = -2
+import kotlin.math.max
+
+private const val ERROR_TYPE = -1.0
+private const val ERROR_LIMIT = -2.0
 fun main() {
- println(commissionCalculation("Mastercard",
-     10000.00, 1000.00 ))
+    println(
+        calculateCommission(
+            cardType = "VKPay",
+            amountTransfersInMonth = 45000.0,
+            currentDaySum = 1000.0
+        )
+    )
 }
 
-fun commissionCalculation(
+val minCommissionOnMM = 20.0
+val minCommissionOnVM = 35.0
+val dayLimit = 150000.00
+val monthLimit = 600000.00
+val vkDayLimit = 15000.00
+val vkMonthLimit = 40000.00
+
+//_______________________________________________________
+fun calculateCommission(
     cardType: String,
     amountTransfersInMonth: Double,
     currentDaySum: Double
 ): Double {
-    var commission = 0.0
-    val minCommissionOnMM = 20.0
-    val minCommissionOnVM = 35.0
-    val dayLimit = 150000.00
-    val monthLimit = 600000.00
-    val vkDayLimit = 15000.00
-    val vkMonthLimit = 40000.00
-    if ((cardType == "Mastercard" || cardType == "Maestro")
-        && amountTransfersInMonth <= 75000.00) {
-        commission = 0.0
-    } else if (currentDaySum >= dayLimit ||
-        amountTransfersInMonth >= monthLimit) {ERROR_LIMIT}
-    else {
-        commission = currentDaySum * 0.006 + minCommissionOnMM
+    return when (cardType) {
+        "Mastercard", "Maestro" -> {
+            if (isInBaseLimits(currentDaySum, amountTransfersInMonth)) {
+                if (currentDaySum < 75000) {
+                    0.0
+                } else {
+                    currentDaySum * 0.006 + minCommissionOnMM
+                }
+            } else ERROR_LIMIT
+        }
+
+        "Visa", "Мир" -> {
+            if (isInBaseLimits(currentDaySum, amountTransfersInMonth)) {
+                max(currentDaySum * 0.0075, minCommissionOnVM)
+            } else ERROR_LIMIT
+        }
+
+        "VKPay" -> {
+            if (currentDaySum <= vkDayLimit && amountTransfersInMonth <= vkMonthLimit) {
+                0.0
+            } else ERROR_LIMIT
+        }
+
+        else -> ERROR_TYPE
     }
 
-         if (cardType == "Visa" || cardType == "Мир") {
-             if (currentDaySum > dayLimit ||
-                 amountTransfersInMonth > monthLimit) {ERROR_LIMIT}
-        } else if (currentDaySum * 0.0075 < minCommissionOnVM) {
-             commission = minCommissionOnVM
-         } else {
-             currentDaySum * 0.0075
-         }
-
-        if (cardType == "VKPay") {
-            commission = 0.0
-        } else if (currentDaySum > vkDayLimit ||
-            amountTransfersInMonth > vkMonthLimit) {ERROR_LIMIT}
-     return commission
 }
 
-
+fun isInBaseLimits(
+    currentDaySum: Double,
+    amountTransfersInMonth: Double
+): Boolean = currentDaySum <= dayLimit && amountTransfersInMonth <= monthLimit
