@@ -5,8 +5,8 @@ private const val ERROR_LIMIT = -2.0
 fun main() {
     println(
         calculateCommission(
-            cardType = "VKPay",
-            amountTransfersInMonth = 45000.0,
+            cardType = "Maestro",
+            amountTransfersInMonth = 74001.0,
             currentDaySum = 1000.0
         )
     )
@@ -21,19 +21,25 @@ val vkMonthLimit = 40000.00
 
 //_______________________________________________________
 fun calculateCommission(
-    cardType: String,
-    amountTransfersInMonth: Double,
+    cardType: String = "VKPay",
+    amountTransfersInMonth: Double = 0.0,
     currentDaySum: Double
-): Double {
+): Any {
     return when (cardType) {
         "Mastercard", "Maestro" -> {
             if (isInBaseLimits(currentDaySum, amountTransfersInMonth)) {
-                if (currentDaySum < 75000) {
+                if (currentDaySum + amountTransfersInMonth < 75000.0) {
                     0.0
+                } else if (amountTransfersInMonth > 75000.0) {
+                    (currentDaySum) * 0.006 + minCommissionOnMM
+                } else if (currentDaySum + amountTransfersInMonth > 75000.0) {
+                    ((currentDaySum + amountTransfersInMonth) - 75000.0) * 0.006 + minCommissionOnMM
                 } else {
-                    currentDaySum * 0.006 + minCommissionOnMM
+                    0.0
                 }
-            } else ERROR_LIMIT
+            } else {
+                ERROR_LIMIT
+            }
         }
 
         "Visa", "Мир" -> {
@@ -43,7 +49,7 @@ fun calculateCommission(
         }
 
         "VKPay" -> {
-            if (currentDaySum <= vkDayLimit && amountTransfersInMonth <= vkMonthLimit) {
+            if (currentDaySum <= vkDayLimit && amountTransfersInMonth + currentDaySum <= vkMonthLimit) {
                 0.0
             } else ERROR_LIMIT
         }
@@ -56,4 +62,4 @@ fun calculateCommission(
 fun isInBaseLimits(
     currentDaySum: Double,
     amountTransfersInMonth: Double
-): Boolean = currentDaySum <= dayLimit && amountTransfersInMonth <= monthLimit
+): Boolean = currentDaySum <= dayLimit && amountTransfersInMonth + currentDaySum <= monthLimit
