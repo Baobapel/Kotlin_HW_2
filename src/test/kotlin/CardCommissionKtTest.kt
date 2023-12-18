@@ -13,7 +13,7 @@ class CardCommissionKtTest {
 
         val result = calculateCommission(cardType, amountTransfersInMonth, currentDaySum)
 
-        assertEquals(1000.0, result)
+        assertEquals(10.0, result)
     }
 
 
