@@ -1,23 +1,17 @@
 import kotlin.math.max
 
-private const val ERROR_TYPE = -1.0
-private const val ERROR_LIMIT = -2.0
+ const val ERROR_TYPE = -1.0
+ const val ERROR_LIMIT = -2.0
 fun main() {
     println(
         calculateCommission(
-            cardType = "Maestro",
-            amountTransfersInMonth = 74001.0,
-            currentDaySum = 1000.0
+            cardType = " ",
+            amountTransfersInMonth = 74000.0,
+            currentDaySum = 2000.0
         )
     )
 }
 
-val minCommissionOnMM = 20.0
-val minCommissionOnVM = 35.0
-val dayLimit = 150000.00
-val monthLimit = 600000.00
-val vkDayLimit = 15000.00
-val vkMonthLimit = 40000.00
 
 //_______________________________________________________
 fun calculateCommission(
@@ -28,12 +22,8 @@ fun calculateCommission(
     return when (cardType) {
         "Mastercard", "Maestro" -> {
             if (isInBaseLimits(currentDaySum, amountTransfersInMonth)) {
-                if (currentDaySum + amountTransfersInMonth < 75000.0) {
-                    0.0
-                } else if (amountTransfersInMonth > 75000.0) {
-                    (currentDaySum) * 0.006 + minCommissionOnMM
-                } else if (currentDaySum + amountTransfersInMonth > 75000.0) {
-                    ((currentDaySum + amountTransfersInMonth) - 75000.0) * 0.006 + minCommissionOnMM
+                if (currentDaySum + amountTransfersInMonth > 75000.0) {
+                    ((currentDaySum + amountTransfersInMonth) - 75000.0) * 0.006 + 20.0
                 } else {
                     0.0
                 }
@@ -44,12 +34,12 @@ fun calculateCommission(
 
         "Visa", "Мир" -> {
             if (isInBaseLimits(currentDaySum, amountTransfersInMonth)) {
-                max(currentDaySum * 0.0075, minCommissionOnVM)
+                max(currentDaySum * 0.0075, 35.0)
             } else ERROR_LIMIT
         }
 
         "VKPay" -> {
-            if (currentDaySum <= vkDayLimit && amountTransfersInMonth + currentDaySum <= vkMonthLimit) {
+            if (currentDaySum <= 15_000.00 && amountTransfersInMonth + currentDaySum <= 40000.00) {
                 0.0
             } else ERROR_LIMIT
         }
@@ -62,4 +52,4 @@ fun calculateCommission(
 fun isInBaseLimits(
     currentDaySum: Double,
     amountTransfersInMonth: Double
-): Boolean = currentDaySum <= dayLimit && amountTransfersInMonth + currentDaySum <= monthLimit
+): Boolean = currentDaySum <= 150_000.00 && amountTransfersInMonth + currentDaySum <= 600_000.00
